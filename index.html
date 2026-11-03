@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Snapbooth 拍照亭 — 網頁拍照、編輯、文字辨識，全程不上傳</title>
+<meta name="description" content="免安裝的網頁拍照亭：用鏡頭拍照，立即裁切、調色、加文字、塗鴉、魔術橡皮擦、文字辨識 OCR。所有處理都在你的瀏覽器完成，照片不會上傳。">
+<meta name="theme-color" content="#4f46e5">
+<meta property="og:title" content="Snapbooth 拍照亭">
+<meta property="og:description" content="拍照、編輯、辨識文字，全部在瀏覽器完成，照片不上傳。">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E📷%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<a class="skip" href="#camera">跳到相機</a>
+
+<header class="topbar">
+  <a class="brand" href="#top"><span class="logo">📷</span> Snapbooth <small>拍照亭</small></a>
+  <nav aria-label="主選單">
+    <a href="#camera">相機</a>
+    <a href="#features">功能</a>
+    <a href="#faq">常見問題</a>
+  </nav>
+</header>
+
+<section class="hero" id="top">
+  <h1>拍照、編輯、辨識文字<br><span class="grad">全部在瀏覽器完成</span></h1>
+  <p>免安裝、免註冊。用筆電鏡頭拍照，立即裁切、調色、加文字、塗鴉、消除路人，還能把照片裡的文字轉成可複製的內容。</p>
+  <div class="cta">
+    <button class="btn primary lg" id="heroStart">📷 開啟相機</button>
+    <button class="btn lg" id="heroImport">🖼 匯入圖片編輯</button>
+  </div>
+  <ul class="chips">
+    <li>🔒 照片不上傳</li>
+    <li>⚡ 免安裝免註冊</li>
+    <li>🧰 裁切・文字・塗鴉・消除・OCR</li>
+  </ul>
+</section>
+
+<main>
+  <section class="card" id="camera" aria-label="相機">
+    <div class="stage" id="stage">
+      <video id="video" autoplay playsinline muted></video>
+      <div class="grid-overlay" id="grid"></div>
+      <div class="flash" id="flash"></div>
+      <div class="count" id="count" aria-live="assertive"><span id="countNum"></span></div>
+      <div class="badge" id="badge"></div>
+      <div class="msg on" id="msg">
+        <h2>準備開始</h2>
+        <p>按下下方按鈕並允許瀏覽器使用鏡頭。</p>
+        <div><button class="btn primary" id="startBtn">開啟相機</button></div>
+      </div>
+    </div>
+
+    <div class="controls" role="toolbar" aria-label="拍照控制">
+      <button class="btn" id="mirrorBtn" aria-pressed="true" title="快捷鍵 M">↔ 水平翻轉</button>
+      <button class="shutter" id="shutter" aria-label="拍照" title="快捷鍵 空白鍵" disabled></button>
+      <button class="btn" id="gridBtn" aria-pressed="false" title="快捷鍵 G">▦ 參考線</button>
+    </div>
+
+    <div class="settings">
+      <label class="field">鏡頭
+        <select id="deviceSel"><option>（尚未開啟）</option></select>
+      </label>
+      <label class="field">解析度
+        <select id="resSel">
+          <option value="0">自動</option>
+          <option value="720">720p</option>
+          <option value="1080">1080p</option>
+          <option value="2160">4K（若支援）</option>
+        </select>
+      </label>
+      <label class="field">倒數計時
+        <select id="timerSel">
+          <option value="0">無</option>
+          <option value="3">3 秒</option>
+          <option value="5">5 秒</option>
+          <option value="10">10 秒</option>
+        </select>
+      </label>
+      <label class="field">拍攝濾鏡
+        <select id="filterSel"></select>
+      </label>
+      <label class="field">下載格式
+        <select id="fmtSel">
+          <option value="image/png">PNG（無損）</option>
+          <option value="image/jpeg">JPEG</option>
+          <option value="image/webp">WebP</option>
+        </select>
+      </label>
+      <label class="field" id="qualField">品質：<span id="qualVal">92</span>%
+        <input type="range" id="qual" min="50" max="100" value="92">
+      </label>
+      <label class="field" style="align-content:end">
+        <span><input type="checkbox" id="soundChk" checked> 快門音效</span>
+      </label>
+    </div>
+    <p class="hint">快捷鍵：<kbd>空白鍵</kbd> 拍照　<kbd>M</kbd> 翻轉　<kbd>G</kbd> 參考線。也可以把圖片檔直接拖進頁面來編輯。</p>
+  </section>
+
+  <section class="card" id="gallery" aria-label="相簿">
+    <div class="gallery-head">
+      <h2>相簿 <span id="count2" style="color:var(--muted);font-weight:400"></span></h2>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn" id="importBtn">＋ 匯入圖片</button>
+        <button class="btn" id="dlAll" disabled>全部下載</button>
+        <button class="btn danger" id="clearAll" disabled>清空</button>
+      </div>
+    </div>
+    <div class="empty" id="empty">還沒有照片，拍一張或匯入圖片吧！</div>
+    <div class="photos" id="photos"></div>
+  </section>
+</main>
+
+<section class="section" id="features">
+  <h2>拍完就能修，不用再開別的軟體</h2>
+  <p class="sub">內建完整的線上編輯器，常用的修圖功能一次到位。</p>
+  <div class="features">
+    <article class="feature"><div class="ico">📷</div><h3>即拍即得</h3><p>倒數計時、水平翻轉、參考線、多鏡頭與最高 4K 解析度。</p></article>
+    <article class="feature"><div class="ico">✂️</div><h3>裁切與旋轉</h3><p>自由或固定比例（1:1、4:3、16:9…），並可旋轉、翻轉。</p></article>
+    <article class="feature"><div class="ico">🎚</div><h3>調整與濾鏡</h3><p>亮度、對比、飽和度、色溫、暈影，搭配即時預覽的一鍵濾鏡。</p></article>
+    <article class="feature"><div class="ico">🅣</div><h3>文字與貼圖</h3><p>多種字型、描邊、陰影、旋轉，還有表情符號貼圖。</p></article>
+    <article class="feature"><div class="ico">🖍</div><h3>塗鴉與馬賽克</h3><p>畫筆、螢光筆、箭頭、方框、橢圓，以及遮蔽隱私的馬賽克。</p></article>
+    <article class="feature"><div class="ico">✨</div><h3>魔術橡皮擦</h3><p>塗抹即可消除路人與雜物；或點一下顏色快速去背成透明 PNG。</p></article>
+    <article class="feature"><div class="ico">🔎</div><h3>文字辨識 OCR</h3><p>支援繁中、簡中、英文、日文、韓文，辨識結果可複製或下載。</p></article>
+    <article class="feature"><div class="ico">🔒</div><h3>隱私優先</h3><p>所有運算都在你的裝置上進行，照片不會離開瀏覽器。</p></article>
+  </div>
+</section>
+
+<section class="section" id="faq">
+  <h2>常見問題</h2>
+  <p class="sub">還有其他問題？歡迎到專案頁面開 Issue。</p>
+  <div class="faq">
+    <details><summary>我的照片會被上傳到伺服器嗎？</summary><p>不會。拍照、編輯、消除、去背都在你的瀏覽器中完成。唯一會連網的是第一次使用「文字辨識」時，需要從 CDN 下載辨識引擎與語言資料，圖片本身仍然不會上傳。</p></details>
+    <details><summary>為什麼無法開啟相機？</summary><p>請確認：1) 網址是 https（或 localhost）；2) 已允許瀏覽器使用相機；3) 沒有其他程式（例如視訊會議）正在占用鏡頭。被拒絕後，可以點網址列左側的鎖頭圖示重新開啟權限。</p></details>
+    <details><summary>文字辨識第一次為什麼比較慢？</summary><p>首次使用需要下載語言資料（中文約數十 MB），之後瀏覽器會快取。辨識本身使用你的 CPU（WebAssembly）運算，圖片越大越久。</p></details>
+    <details><summary>魔術橡皮擦的效果如何？</summary><p>它使用純演算法，以周圍像素填補，適合移除小型物件、污點、路人或雜物，背景單純時效果最好。大面積或複雜紋理的物件可能會留下模糊痕跡，可分次小範圍塗抹。</p></details>
+    <details><summary>可以離線使用嗎？</summary><p>除了文字辨識（需要下載引擎）之外，其餘功能載入頁面後都不需要網路。</p></details>
+    <details><summary>支援哪些瀏覽器？</summary><p>最新版 Chrome、Edge、Firefox、Safari 皆可。部分舊版 Safari 不支援 Canvas 濾鏡，網站會自動改用相容的算法。</p></details>
+  </div>
+</section>
+
+<footer>
+  <p>Snapbooth 拍照亭 · 照片只在你的瀏覽器中處理，重新整理後相簿會清空，請記得先下載。</p>
+</footer>
+
+<input type="file" id="fileIn" accept="image/*" multiple hidden>
+<div id="toast" role="status" aria-live="polite"></div>
+<div id="dropHint">放開滑鼠，匯入圖片</div>
+<div class="sr" id="live" aria-live="polite"></div>
+
+<dialog id="lightbox"><img id="lbImg" alt="照片預覽"></dialog>
+
+<dialog id="exportDlg" aria-labelledby="expTitle">
+  <form method="dialog" class="dlg">
+    <h3 id="expTitle">匯出照片</h3>
+    <div class="prev"><canvas id="expPrev"></canvas></div>
+    <div class="grid2">
+      <label class="field">格式
+        <select id="expFmt">
+          <option value="image/png">PNG（無損，支援透明）</option>
+          <option value="image/jpeg">JPEG（檔案小）</option>
+          <option value="image/webp">WebP</option>
+        </select>
+      </label>
+      <label class="field">尺寸
+        <select id="expScale">
+          <option value="100">100%（原始大小）</option>
+          <option value="75">75%</option>
+          <option value="50">50%</option>
+          <option value="25">25%</option>
+        </select>
+      </label>
+    </div>
+    <label class="field" id="expQField">品質：<span id="expQVal">92</span>%
+      <input type="range" id="expQ" min="50" max="100" value="92">
+    </label>
+    <div class="info" id="expInfo"></div>
+    <div class="btns">
+      <button type="button" class="btn primary" id="expDownload">⬇ 下載</button>
+      <button type="button" class="btn" id="expCopy">複製圖片</button>
+      <button type="button" class="btn" id="expShare" hidden>分享</button>
+    </div>
+    <div class="btns">
+      <button type="button" class="btn" id="expSaveCopy" hidden>另存為新照片</button>
+      <button class="btn ghost" value="close">關閉</button>
+    </div>
+  </form>
+</dialog>
+
+<div id="editor" class="editor" role="dialog" aria-modal="true" aria-label="照片編輯器" hidden>
+  <div class="ed-top">
+    <button class="btn ghost" id="edCancel">✕ 取消</button>
+    <div class="ed-title">編輯照片</div>
+    <div class="ed-actions">
+      <button class="icon-btn" id="edUndo" title="復原 (Ctrl+Z)" aria-label="復原">↶</button>
+      <button class="icon-btn" id="edRedo" title="重做 (Ctrl+Shift+Z)" aria-label="重做">↷</button>
+      <button class="btn ghost sm" id="edReset">還原原圖</button>
+      <span class="sep"></span>
+      <button class="icon-btn" id="edZoomOut" title="縮小" aria-label="縮小">−</button>
+      <button class="btn ghost sm" id="edZoomLbl" title="點擊切換「適合畫面」與 100%">100%</button>
+      <button class="icon-btn" id="edZoomIn" title="放大" aria-label="放大">＋</button>
+      <span class="sep"></span>
+      <button class="btn" id="edExport">下載…</button>
+      <button class="btn primary" id="edDone">完成</button>
+    </div>
+  </div>
+  <div class="ed-body">
+    <nav class="ed-tools" id="edTools" role="tablist" aria-label="編輯工具">
+      <button role="tab" data-tool="adjust"><span class="i">🎚</span>調整</button>
+      <button role="tab" data-tool="crop"><span class="i">✂️</span>裁切</button>
+      <button role="tab" data-tool="text"><span class="i">🅣</span>文字</button>
+      <button role="tab" data-tool="draw"><span class="i">🖍</span>塗鴉</button>
+      <button role="tab" data-tool="erase"><span class="i">✨</span>橡皮擦</button>
+      <button role="tab" data-tool="frame"><span class="i">🖼</span>相框</button>
+      <button role="tab" data-tool="ocr"><span class="i">🔎</span>辨識文字</button>
+    </nav>
+    <div class="ed-scroll" id="edScroll">
+      <div class="ed-stack" id="edStack">
+        <canvas id="edCanvas"></canvas>
+        <canvas id="edOverlay"></canvas>
+        <div class="crop" id="edCrop" hidden>
+          <i data-d="nw"></i><i data-d="n"></i><i data-d="ne"></i><i data-d="w"></i><i data-d="e"></i><i data-d="sw"></i><i data-d="s"></i><i data-d="se"></i>
+        </div>
+        <div class="ring" id="edRing" hidden></div>
+      </div>
+    </div>
+    <aside class="ed-panel" id="edPanel" aria-live="polite"></aside>
+  </div>
+  <div class="ed-busy" id="edBusy" hidden><div class="spin"></div><span id="edBusyTxt">處理中…</span></div>
+</div>
+
+<script src="js/inpaint.js" defer></script>
+<script src="js/app.js" defer></script>
+<script src="js/editor.js" defer></script>
+</body>
+</html>

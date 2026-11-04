@@ -122,8 +122,9 @@
     <article class="feature"><div class="ico">🎚</div><h3>調整與濾鏡</h3><p>亮度、對比、飽和度、色溫、暈影，搭配即時預覽的一鍵濾鏡。</p></article>
     <article class="feature"><div class="ico">🅣</div><h3>文字與貼圖</h3><p>多種字型、描邊、陰影、旋轉，還有表情符號貼圖。</p></article>
     <article class="feature"><div class="ico">🖍</div><h3>塗鴉與馬賽克</h3><p>畫筆、螢光筆、箭頭、方框、橢圓，以及遮蔽隱私的馬賽克。</p></article>
-    <article class="feature"><div class="ico">✨</div><h3>魔術橡皮擦</h3><p>塗抹即可消除路人與雜物；或點一下顏色快速去背成透明 PNG。</p></article>
-    <article class="feature"><div class="ico">🔎</div><h3>文字辨識 OCR</h3><p>支援繁中、簡中、英文、日文、韓文，辨識結果可複製或下載。</p></article>
+    <article class="feature"><div class="ico">✨</div><h3>魔術橡皮擦<span class="tag">AI</span></h3><p>塗抹即可消除路人與雜物，可選免下載的快速演算法，或 MI-GAN／LaMa 的 AI 修補；還能一鍵偵測主體並移除。</p></article>
+    <article class="feature"><div class="ico">🪄</div><h3>AI 一鍵去背<span class="tag">AI</span></h3><p>U²-Net 與 BiRefNet 自動分離主體，輸出柔邊透明 PNG；也保留點選顏色去背。</p></article>
+    <article class="feature"><div class="ico">🔎</div><h3>文字辨識 OCR<span class="tag">AI</span></h3><p>標準版 Tesseract，或進階 PaddleOCR PP-OCRv5，對中文與排版更準；結果可複製或下載。</p></article>
     <article class="feature"><div class="ico">🔒</div><h3>隱私優先</h3><p>所有運算都在你的裝置上進行，照片不會離開瀏覽器。</p></article>
   </div>
 </section>
@@ -132,7 +133,9 @@
   <h2>常見問題</h2>
   <p class="sub">還有其他問題？歡迎到專案頁面開 Issue。</p>
   <div class="faq">
-    <details><summary>我的照片會被上傳到伺服器嗎？</summary><p>不會。拍照、編輯、消除、去背都在你的瀏覽器中完成。唯一會連網的是第一次使用「文字辨識」時，需要從 CDN 下載辨識引擎與語言資料，圖片本身仍然不會上傳。</p></details>
+    <details><summary>我的照片會被上傳到伺服器嗎？</summary><p>不會。拍照、編輯、消除、去背、文字辨識都在你的瀏覽器中完成。唯一會連網的是第一次使用 AI 功能時，需要下載執行環境（ONNX Runtime）與模型檔（來自 jsDelivr 與 Hugging Face），只會「下載」這些檔案，圖片本身不會上傳。</p></details>
+    <details><summary>AI 模型有多大？要下載多久？</summary><p>標準 AI 消除（MI-GAN）約 28 MB、高品質（LaMa）約 208 MB；快速去背（U²-Net-P）約 4.6 MB、高品質（BiRefNet-lite）約 115–224 MB；進階文字辨識約 21 MB。只在你使用時下載一次，之後存在瀏覽器快取，可在頁尾的「管理已下載的 AI 模型」查看或刪除。</p></details>
+    <details><summary>AI 功能需要什麼裝置？</summary><p>建議使用最新版 Chrome 或 Edge；支援 WebGPU 時速度明顯較快，不支援時會自動改用 CPU（較慢，LaMa 與 BiRefNet 可能需要十幾秒到數十秒）。手機或記憶體較小的裝置建議選用較輕量的模型。</p></details>
     <details><summary>為什麼無法開啟相機？</summary><p>請確認：1) 網址是 https（或 localhost）；2) 已允許瀏覽器使用相機；3) 沒有其他程式（例如視訊會議）正在占用鏡頭。被拒絕後，可以點網址列左側的鎖頭圖示重新開啟權限。</p></details>
     <details><summary>文字辨識第一次為什麼比較慢？</summary><p>首次使用需要下載語言資料（中文約數十 MB），之後瀏覽器會快取。辨識本身使用你的 CPU（WebAssembly）運算，圖片越大越久。</p></details>
     <details><summary>魔術橡皮擦的效果如何？</summary><p>它使用純演算法，以周圍像素填補，適合移除小型物件、污點、路人或雜物，背景單純時效果最好。大面積或複雜紋理的物件可能會留下模糊痕跡，可分次小範圍塗抹。</p></details>
@@ -143,7 +146,21 @@
 
 <footer>
   <p>Snapbooth 拍照亭 · 照片只在你的瀏覽器中處理，重新整理後相簿會清空，請記得先下載。</p>
+  <p><button class="btn ghost sm" id="manageModels">🧠 管理已下載的 AI 模型</button></p>
 </footer>
+
+<dialog id="modelDlg" aria-labelledby="mmTitle">
+  <form method="dialog" class="dlg">
+    <h3 id="mmTitle">AI 模型管理</h3>
+    <p class="info" style="text-align:left">進階功能的 AI 模型只在你使用時才下載，並儲存在這個瀏覽器的快取中；照片本身不會上傳。你可以隨時刪除以釋放空間。</p>
+    <div id="mmList" class="mm-list"></div>
+    <div class="info" id="mmTotal"></div>
+    <div class="btns">
+      <button type="button" class="btn danger" id="mmClear">全部刪除</button>
+      <button class="btn" value="close">關閉</button>
+    </div>
+  </form>
+</dialog>
 
 <input type="file" id="fileIn" accept="image/*" multiple hidden>
 <div id="toast" role="status" aria-live="polite"></div>
@@ -228,11 +245,17 @@
     </div>
     <aside class="ed-panel" id="edPanel" aria-live="polite"></aside>
   </div>
-  <div class="ed-busy" id="edBusy" hidden><div class="spin"></div><span id="edBusyTxt">處理中…</span></div>
+  <div class="ed-busy" id="edBusy" hidden>
+    <div class="spin"></div>
+    <span id="edBusyTxt">處理中…</span>
+    <progress id="edBusyBar" max="1" hidden></progress>
+    <button class="btn sm" id="edBusyCancel" hidden>取消下載</button>
+  </div>
 </div>
 
 <script src="js/inpaint.js" defer></script>
 <script src="js/app.js" defer></script>
+<script src="js/ai.js" defer></script>
 <script src="js/editor.js" defer></script>
 </body>
 </html>

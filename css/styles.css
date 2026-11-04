@@ -190,6 +190,15 @@ progress{width:100%;height:8px;accent-color:var(--brand)}
 .spin{width:38px;height:38px;border-radius:50%;border:4px solid rgba(255,255,255,.25);border-top-color:#fff;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 
+.tag{display:inline-block;margin-left:6px;padding:0 7px;border-radius:6px;background:var(--grad);color:#fff;font-size:.68rem;font-weight:700;vertical-align:middle;letter-spacing:.04em}
+#edBusyBar{width:260px}
+.ed-panel select{width:100%}
+.ed-panel .ok{color:#34c759}
+.ed-panel .warn{color:#ff9f0a}
+.mm-list{display:grid;gap:8px}
+.mm-row{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:8px 10px;border:1px solid var(--line);border-radius:10px}
+.mm-row small{display:block;color:var(--muted)}
+.mm-st{font-size:.8rem;color:var(--muted)}
 @media (max-width:860px){
   .ed-body{grid-template-columns:1fr;grid-template-rows:1fr auto auto}
   .ed-tools{order:3;flex-direction:row;border-right:0;border-top:1px solid var(--line);overflow-x:auto}
